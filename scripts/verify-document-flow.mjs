@@ -26,6 +26,9 @@ let workers=0;globalThis.Worker=class{constructor(){workers++;throw Error('OCR w
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const w='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const nodes=(parent,local)=>[...parent.getElementsByTagNameNS(w,local)];
+// Adjacent native items can share one ordinary Word run. Compare paragraph text,
+// not PDF item/run boundaries; ignore whitespace normalized for natural editing.
+const paragraphTexts=doc=>nodes(doc,'p').map(p=>[...p.childNodes].filter(n=>n.namespaceURI===w&&n.localName==='r'&&!nodes(n,'txbxContent').length).map(run=>nodes(run,'t').map(t=>t.textContent).join('')).join('').replace(/\s/g,'')).filter(Boolean).sort();
 const signal=new AbortController().signal;
 if(stage==='pdf-word'){
  const {convertPDFToEditableWord}=await import('../tools/pdf-editable-word.ts');
@@ -47,7 +50,7 @@ if(stage==='pdf-word'){
   const before=JSON.parse(await readFile(resolve(root,'../toolfera-paragraph-copy/after/'+name+'-layout.json'),'utf8'));
   const previous=unzipSync(new Uint8Array(await readFile(resolve(root,'../toolfera-paragraph-copy/after/'+name+'-Editable-Word.docx'))));
   const previousDoc=new DOMParser().parseFromString(strFromU8(previous['word/document.xml']),'application/xml');
-  assert.deepEqual(nodes(doc,'t').map(t=>t.textContent).sort(),nodes(previousDoc,'t').map(t=>t.textContent).sort(),'Text is neither lost nor duplicated; main-story order now interleaves tables');
+  assert.deepEqual(paragraphTexts(doc),paragraphTexts(previousDoc),'Paragraph text is neither lost nor duplicated when adjacent runs merge');
   assert.deepEqual(media,before.media,'Localized diagram/logo/Gantt image bytes are unchanged');
   assert.deepEqual(JSON.parse(JSON.stringify(result.layout)),before.layout,'Native layout extraction and graphic/table detection remain unchanged');
   const paragraphs=direct.filter(n=>n.localName==='p'),populated=paragraphs.filter(p=>nodes(p,'t').length);

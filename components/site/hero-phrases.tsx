@@ -4,23 +4,15 @@ const phrases=['merge PDFs','compress PDFs','PDF to DOCX','Word to PDF','resize 
 export function HeroPhrases(){
  const [index,setIndex]=useState(0);
  useEffect(()=>{
-  // Text stays useful with reduced motion: change it more slowly without movement.
-  // One timeout runs while visible; browser/background recovery always rearms it.
-  const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
-  let timer:ReturnType<typeof setTimeout>|undefined;
-  const stop=()=>{clearTimeout(timer);timer=undefined};
-  const resume=()=>{
-   stop();if(document.hidden)return;
-   timer=setTimeout(()=>{
-    timer=undefined;if(document.hidden)return;
-    setIndex(i=>(i+1)%phrases.length);resume();
-   },motion.matches?5200:2600);
-  };
-  resume();
-  motion.addEventListener('change',resume);
-  document.addEventListener('visibilitychange',resume);
-  window.addEventListener('pageshow',resume);window.addEventListener('pagehide',stop);window.addEventListener('focus',resume);
-  return()=>{stop();motion.removeEventListener('change',resume);document.removeEventListener('visibilitychange',resume);window.removeEventListener('pageshow',resume);window.removeEventListener('pagehide',stop);window.removeEventListener('focus',resume)};
+  // Restore v25's independent clock: focus/keyboard events must not postpone it.
+  // Reduced motion slows useful text updates; it never makes them static.
+  const motion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const period=()=>motion?.matches?5200:2600;
+  let nextAt=Date.now()+period();
+  const tick=()=>{if(!document.hidden&&Date.now()>=nextAt){nextAt=Date.now()+period();setIndex(i=>(i+1)%phrases.length)}};
+  const timer=setInterval(tick,2600),resume=()=>tick();
+  document.addEventListener('visibilitychange',resume);window.addEventListener('pageshow',resume);window.addEventListener('focus',resume);
+  return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',resume);window.removeEventListener('pageshow',resume);window.removeEventListener('focus',resume)};
  },[]);
  return <div className="hero-verbs" aria-hidden="true"><span>Your next task</span><span className="verb-window"><b key={index} className="hero-phrase">{phrases[index]}.</b></span></div>
 }

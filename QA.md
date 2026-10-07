@@ -1,8 +1,8 @@
-> Latest published release: **version 27**, targeted PDF-to-Word parity, hero rotation and homepage example-surface checks on 7 October 2026. The latest results are recorded at the end. Version-26 optimization evidence below is retained with its original scope and was not broadly rerun.
+> Latest published release: **version 28**, targeted native Word-editing, homepage-motion and complete card-demo removal on **7 October 2026**. The final correction section is authoritative. Earlier v26/v27 evidence is historical and does not establish current phone or Word/WPS acceptance.
 
-# Tool Fera — performance, accessibility and frontend stability
+# Tool Fera — targeted correction and retained release evidence
 
-Verified source/build: **7 October 2026 (UTC)**. Continued the existing saved **v25** project on `main`; no restart, redesign, domain migration or converter rewrite. This is the current optimization report. Earlier conversion, network and resource reports remain historical evidence for unchanged areas, not fresh certification here.
+Verified source/build: **7 October 2026 (UTC)**. Continued the existing saved **v25** project on `main`; no restart, redesign, domain migration or converter rewrite. This is the retained version-26 optimization report; the current correction is documented at the end. Earlier conversion, network and resource reports remain historical evidence for unchanged areas, not fresh certification here.
 
 Scope: performance, normal accessibility improvements and application-origin best practices. The previously saved metadata/content changes were preserved. No further SEO research or implementation was performed during this resumed pass.
 
@@ -129,7 +129,7 @@ A usable Chrome UI surface became available for live production smoke checks, at
 Published desktop screenshot: `docs/performance/toolfera-v26-production.jpg`. The GitHub commit/push receipt is reported after creating the one final commit; its SHA is not predicted inside this document.
 
 
-## Targeted PDF → Word / hero / homepage continuation — 7 October 2026
+## Historical version-27 PDF → Word / hero / homepage continuation — 7 October 2026
 
 This pass changed only `components/site/hero-phrases.tsx` and homepage-scoped rules in `app/globals.css`. No processing algorithm, Word → PDF/OCR tool, routing, SEO, navigation, download choreography, header or unrelated card/section implementation changed. The current static navy/gradient header remains intact.
 
@@ -182,3 +182,76 @@ The actual published homepage was checked in Chrome at **1363 × 936**, with `pr
 All eight homepage preview areas had transparent computed backgrounds, zero left/right/bottom border widths, a 1 px top separator, zero panel minimum height and no horizontal preview overflow. Outer cards remained 301 px wide, with balanced 348.73 px first-row / 328.59 px second-row heights. Main cards, labels, icons, stars and Open tool links were present and visually reviewed. Page-level horizontal overflow was false. The static navy header remained readable and unchanged. Screenshot: `docs/performance/toolfera-v27-cards-final.jpg`.
 
 No Tool Fera application-origin errors/warnings appeared in the captured post-publication logs; the returned errors had extension URLs. Mobile widths remain compiled-CSS checks, not an actual mobile-browser/phone visual test. No additional production build was needed after documentation/screenshot recording.
+
+
+## Current targeted correction — native Word editing, homepage motion and clean cards
+
+**Date:** 7 October 2026 (UTC). Continued saved version 27. No restart, full performance/SEO/route audit, unrelated tool QA, new conversion mode or header redesign was performed.
+
+### PDF → Word — completed implementation; Office interaction partially verified
+
+The supplied 14.23-second WPS recording was reviewed as a sequence of frames before source edits. Deleting the cover heading leaves its remaining letters stretched across the old width. The preserved v25 source (`2872881895b20380bd296a3248d3de42bb3470f5`) and current v27 converter files were byte-identical before this correction. Restoring that packer unchanged would therefore retain this defect; the earlier zero-text-box/parity checks did **not** prove natural editing.
+
+The confirmed formatting cause is `w:fitText`, which forces each run into its measured PDF width, compounded by coordinate-derived `w:tab`/`w:tabs` stops. V27 fixture outputs contained 497 fit-width entries / 494 tab elements for BudgetMate and 2,429 / 58 for alcheMe. Ordinary text was already in the main body; text boxes, OCR and a new loading wrapper were not the cause.
+
+Only `tools/pdf-editable-docx.ts` runtime packing changed:
+
+- Removed all fit-width/expanded text and coordinate tab generation.
+- Joined adjacent items with the same typography into normal Word runs; word boundaries use ordinary single spaces, not fixed horizontal anchors.
+- Kept native extraction, paragraph grouping, explicit source-page sections, ordinary indentation/line leading, real empty paragraphs, editable table models and localized graphics unchanged. Original line breaks remain; font substitution and edits may require manual layout adjustment.
+- PDF component, PDF.js initialization/assets, lazy engine loading, native layout extraction and the separate scanned-PDF OCR guidance are unchanged. No OCR was added.
+
+The existing regression harness was reused for its PDF→Word stage only, using both preserved real PDFs. A small assertion in `scripts/verify-document-flow.mjs` now compares paragraph text independently of run segmentation/normalized whitespace. Its current expression passed against both generated outputs and the preserved baseline (277 / 271 text-bearing paragraphs including table cells). No large new suite was added.
+
+| Fixture | Source pages | DOCX sections | Main-body text elements | Text-bearing body paragraphs | Editable tables | Localized images | Fit-width entries / tabs / text boxes |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| BudgetMate | 16 | 16 | 443 | 134 | 9 | 3 | 0 / 0 / 0 |
+| alcheMe | 16 | 16 | 396 | 245 | 1 | 0 | 0 / 0 / 0 |
+
+Both conversions passed: native layout JSON and graphic bytes exactly match the preserved baseline; non-whitespace text/reading order matches v27; all paragraph text matches the earlier baseline independent of run boundaries; temporary crop canvases were released; zero OCR worker calls were recorded. The heading `Final Year Project Proposal` is one ordinary text run. XML deletion/insertion leaves no fixed-width, character-spacing, distributed alignment, excessive whitespace or text-box property behind. These are engine/XML checks, **not interactive Microsoft Word/WPS tests**. Sixteen sections preserve source boundaries; a new rendered DOCX page count was **not measured**.
+
+### Homepage motion — completed source correction; phone acceptance unverified
+
+`components/site/hero-phrases.tsx` restores v25's independent interval/deadline clock. V27's timeout was restarted by every focus/resume event; a targeted reproduction with ten focus events over ten seconds produced **zero** changes before this correction and **three** with the corrected source. Recovery events now check the clock without postponing its deadline. One interval exists, with full listener/interval cleanup; hidden pages skip updates and foreground/pageshow recovery advances at most one phrase, without a catch-up burst. No hover, touch or mobile breakpoint is required.
+
+Normal updates use a 2,600 ms period. Reduced-motion updates use 5,200 ms, with a mild opacity-only transition. The component no longer requires the newer MediaQueryList event API to initialize. Controlled hook/clock tests passed the nine-phrase cycle, focus stress, hidden/visible and pagehide/pageshow recovery, resize/orientation/pointer independence, live preference changes, legacy media-query API compatibility, cleanup and remount.
+
+`app/globals.css` preserves v25's **six-second cobalt/cyan orbit for normal motion**. The confirmed static search-border path under reduced motion had replaced v25's four-edge fallback with a stationary gradient. The gentle eight-second edge-opacity sequence is restored only inside `.hero-search`; it is slower, without spatial movement, and does not reintroduce the global Full Effects accessibility override. The Find a tool modal remains static. The current static navy/gradient header is untouched.
+
+The supplied phone recording cannot reveal its actual `prefers-reduced-motion`/visibility/timer state. The specific focus-starvation and reduced-motion static paths are reproduced/removed in source checks; this is **not proof of the exact runtime state on the user's phone**. Browser/device visual results, if obtained, are recorded separately below.
+
+### Homepage cards — demo content removed completely
+
+`components/site/primitives.tsx` no longer imports/renders `ToolPreview`. Non-standard card variants are used only by the homepage popular section. All example panels **and all their content** are removed for Image Compressor, PDF Merger, Percentage Calculator, Word Counter, PDF to PNG/JPG, JSON Formatter, QR Code Generator and Fuel Cost Calculator. No replacement example, separator, graphic or sample result was added.
+
+All eight outer cards retain icon, category, favorite control, title, short description and Open tool link. Homepage-only CSS switches the former featured example grid to the same natural column flow, reduces the desktop minimum height to 222 px and removes that minimum on mobile. Category labels remain visible on mobile. Compiled cascade checks passed at 320, 360, 375, 390, 430, 768, 1024, 1280 and 1440 px: one/two/three/four grid columns follow the existing breakpoints, featured content uses flex flow, and normal/reduced search animations are present. These are **compiled CSS checks**, not mobile visual overflow measurements.
+
+### Checks, scope and measured build evidence
+
+- TypeScript: **passed**, `tsc --noEmit --incremental false`.
+- Production build: **passed once**, after the four runtime-file changes. The subsequent assertion/documentation edits do not change application bundles; no second build was run.
+- Production Worker smoke checks: homepage and PDF→Word returned 200; all eight cards and primary links/labels remain, with zero demo blocks; PDF engine/worker assets returned 200; no application Worker errors. Miniflare reported one infrastructure-only `Request.cf` metadata-fetch timeout and used its documented placeholder; this is not reported as an application error or hidden as a warning-free test.
+- Compiled PDF→Word import graph contains no OCR/Tesseract/Word parser. Homepage's initial static JS graph remains free of heavy processing engines.
+- Homepage static JS graph: **428,289 raw / 133,481 separately gzipped bytes**, versus v27 **428,426 / 133,496** (−137 / −15). This is a static graph sum, not observed transfer bytes or performance timing. V26 was 428,201 / 133,458; no significant homepage-JS reduction is claimed.
+- Homepage stylesheet: **139,685 raw bytes** versus v27 138,615 (+1,070 for scoped motion/card rules). The separate action stylesheet remains **19,220 bytes**, unchanged; existing compression/download choreography and timing are untouched.
+- Final runtime diff is limited to `tools/pdf-editable-docx.ts`, `components/site/hero-phrases.tsx`, `components/site/primitives.tsx` and `app/globals.css`. The only additional source edit is the existing PDF regression assertion. Word→PDF, OCR, PDF Compressor, image-processing algorithms, navigation, search behavior, header, routes, SEO metadata and processing wrappers were not changed.
+- Existing v26 CSS scope, deferred menu/search content, deferred DOCX parser, safe route prefetching, heavy-engine separation, touch targets, labels, contrast and resource cleanup remain.
+
+### Release / remaining verification limits
+
+Version **28** was saved from Sites source `a199e7f63f5d66a3d824314c8bc6e4e2c5dc5648` and successfully published at **2026-10-07T19:29:22.417976Z** on the existing public Site. Repository/branch: `aftab-62/Toolfera`, `main`; single release commit message: `Restore v25 document editing and homepage motion`. Its final SHA/push receipt is reported after commit creation, without predicting a self-referential SHA inside this file. No previous commit is rewritten.
+
+**Not verified / not measured:** physical-phone behavior; actual Android/browser motion preference; keyboard/orientation recovery on a phone; interactive Word/WPS deletion/insertion/copy; freshly rendered DOCX pagination and visual page comparison; native saved-file completion; cross-browser/device matrix; Lighthouse, mobile timing and real-user Core Web Vitals. The historical exact `Object.defineProperty` cause remains unreproduced. No broader QA claim is renewed by this targeted pass.
+
+
+### Version-28 live desktop evidence after publication
+
+Actual production Chrome was checked at **1363 × 936**, `prefers-reduced-motion: reduce = false`, `document.hidden = false`, using `/_next/static/css/index.DmoqekDe.css`.
+
+- Timed observations at 16 / 1,031 / 2,047 / 3,062 / 5,077 ms showed `format JSON` changing to `calculate instantly` and then `merge PDFs`. The search orbit remained running at six seconds and its transform changed at every observation. Two real screenshots three seconds apart also showed `compress PDFs` → `PDF to DOCX` and the moving border light; these were visually inspected.
+- Search input focus did not stop rotation (`convert images` → `format JSON`). Opening the Find a tool dialog did not stop it (`PDF to DOCX` → `Word to PDF`); closing restored the trigger. The modal contained zero animated-border elements.
+- All eight homepage cards were **301 × 224 px**, with their category, favorite and Open control intact, zero demo blocks, no card horizontal overflow and no page horizontal overflow. Both rows were visually reviewed. Screenshot: `docs/performance/toolfera-v28-cards.jpg`. The static navy header remains unchanged.
+- The actual production PDF→Word tool read and converted both preserved PDFs successfully, reporting sixteen source pages and ready DOCX results: BudgetMate **697.1 KB**, alcheMe **17.9 KB**. These are UI output-size labels and source-page counts, not newly rendered Office page counts. The BudgetMate Download Word File link produced a browser download event after its unchanged animation. Its returned file path/copy was not available for workspace readback within the five-second handoff check; a subsequent direct read of that returned path also failed. Browser-produced DOCX XML and native saved-file completion therefore remain **unverified**; current XML assertions above come from the actual local engine outputs, not an invented browser readback.
+- No Tool Fera application-origin warning/error was returned in the captured production logs. The returned errors were extension metadata messages with `chrome-extension://` source URLs and were excluded by origin. One read-only browser test referenced an unavailable `performance.now` helper; it was corrected to record elapsed time in the controlling session, without a product change.
+
+No mobile viewport emulation or physical phone was exposed by this browser interface. Normal/reduced mobile motion and compact-card layout remain verified by current-source/compiled-CSS checks only; real-phone visual acceptance, OS preference diagnostics and interactive Word/WPS editing still require manual verification. Documentation/screenshot recording after publication changed no runtime source and required no new build or publication.

@@ -11,27 +11,33 @@ const pt=(n:number)=>Math.round(n*1000)/1000;
 export const wordBaseline=(size:number,leading:number)=>leading*.5+size*.35+Math.max(0,leading-size*1.15)*.3;
 
 export function packageEditablePDF(pages:EditablePage[],signal:AbortSignal){
- const entries:Record<string,Uint8Array>={},rels:string[]=[];let shape=0,fit=0,image=0;
+ const entries:Record<string,Uint8Array>={},rels:string[]=[];let shape=0,image=0;
  // Native content establishes a usable left margin for normal blank paragraphs.
  // Paragraph/table indents compensate it, leaving physical placement unchanged.
  const leftMargin=(page:EditablePage)=>Math.max(0,Math.min(page.width*.25,...page.paragraphs.map(p=>p.x),...page.tables.map(t=>t.x)));
  const section=(page:EditablePage)=>`<w:sectPr><w:type w:val="nextPage"/><w:pgSz w:w="${twips(page.width)}" w:h="${twips(page.height)}"${page.width>page.height?' w:orient="landscape"':''}/><w:pgMar w:top="0" w:right="0" w:bottom="0" w:left="${twips(leftMargin(page))}" w:header="0" w:footer="0" w:gutter="0"/><w:cols w:space="0"/></w:sectPr>`;
- function run(item:NativeText){return`<w:r><w:rPr><w:rFonts w:ascii="${escape(item.font)}" w:hAnsi="${escape(item.font)}" w:eastAsia="${escape(item.font)}" w:cs="${escape(item.font)}"/>${item.bold?'<w:b/>':''}${item.italic?'<w:i/>':''}${item.rtl?'<w:rtl/>':''}<w:color w:val="${item.color}"/><w:sz w:val="${Math.max(2,Math.round(item.size*2))}"/><w:szCs w:val="${Math.max(2,Math.round(item.size*2))}"/>${item.width>.1&&item.text.trim()?`<w:fitText w:val="${Math.max(1,twips(item.width))}" w:id="${++fit}"/>`:''}</w:rPr><w:t xml:space="preserve">${escape(item.text)}</w:t></w:r>`;}
+ function run(item:NativeText){return`<w:r><w:rPr><w:rFonts w:ascii="${escape(item.font)}" w:hAnsi="${escape(item.font)}" w:eastAsia="${escape(item.font)}" w:cs="${escape(item.font)}"/>${item.bold?'<w:b/>':''}${item.italic?'<w:i/>':''}${item.rtl?'<w:rtl/>':''}<w:color w:val="${item.color}"/><w:sz w:val="${Math.max(2,Math.round(item.size*2))}"/><w:szCs w:val="${Math.max(2,Math.round(item.size*2))}"/></w:rPr><w:t xml:space="preserve">${escape(item.text)}</w:t></w:r>`;}
  function paragraph(lines:NativeLine[],origin:number,leading:number,before=0,heading=false,indent=0){
   if(!lines.length)return'<w:p><w:pPr><w:spacing w:after="0" w:line="1" w:lineRule="exact"/></w:pPr></w:p>';
-  const stops=new Set<number>();let content='';
+  let content='';
   for(const [number,line]of lines.entries()){
    if(number)content+='<w:r><w:br/></w:r>';
-   let right=origin;
+   let previous:NativeText|undefined,pending:NativeText|undefined;
+   const flush=()=>{if(pending){content+=run(pending);pending=undefined}};
    for(const item of line.items){
-    // PDF.js uses synthetic whitespace items for column gaps. A normal Word
-    // space does not preserve their measured width; use the next tab stop.
-    if(!item.text.trim()&&item.width>item.size*.65)continue;
-    if(item.x-right>.6){const position=twips(item.x-origin+indent);stops.add(position);content+='<w:r><w:tab/></w:r>';}
-    content+=run(item);right=item.x+item.width;
+    // Coordinates identify a word boundary, never a fixed Word width/tab.
+    // Word must close gaps naturally when characters are deleted or inserted.
+    let text=item.text.replace(/\s+/g,' ');
+    if(!text.trim()){if(pending&&!pending.text.endsWith(' '))pending.text+=' ';previous=item;continue;}
+    if(!previous)text=text.trimStart();
+    if(previous&&pending&&!pending.text.endsWith(' ')&&!text.startsWith(' ')&&item.x-previous.x-previous.width>Math.max(.6,Math.min(item.size,previous.size)*.16))text=' '+text;
+    if(pending&&pending.font===item.font&&pending.size===item.size&&pending.bold===item.bold&&pending.italic===item.italic&&pending.color===item.color&&pending.rtl===item.rtl)pending.text+=text;
+    else{flush();pending={...item,text};}
+    previous=item;
    }
+   if(pending)pending.text=pending.text.trimEnd();flush();
   }
-  return`<w:p><w:pPr>${heading?'<w:pStyle w:val="Heading2"/>':''}<w:keepNext w:val="0"/><w:keepLines w:val="0"/><w:widowControl w:val="0"/><w:tabs>${[...stops].sort((a,b)=>a-b).map(s=>`<w:tab w:val="left" w:pos="${s}"/>`).join('')}</w:tabs><w:spacing w:before="${Math.max(0,twips(before))}" w:after="0" w:line="${Math.max(1,twips(leading))}" w:lineRule="exact"/><w:ind w:left="${twips(indent)}"/><w:jc w:val="left"/></w:pPr>${content}</w:p>`;
+  return`<w:p><w:pPr>${heading?'<w:pStyle w:val="Heading2"/>':''}<w:keepNext w:val="0"/><w:keepLines w:val="0"/><w:widowControl w:val="0"/><w:spacing w:before="${Math.max(0,twips(before))}" w:after="0" w:line="${Math.max(1,twips(leading))}" w:lineRule="exact"/><w:ind w:left="${twips(indent)}"/><w:jc w:val="left"/></w:pPr>${content}</w:p>`;
  }
  function tableXML(table:NativeTable,margin=0){
   const widths=table.columns.slice(1).map((x,i)=>x-table.columns[i]);
