@@ -180,6 +180,11 @@ html:has(.hub-dialog[open]){overflow:hidden}
 
 .tool-search:focus-within .search-light{opacity:1}
 
+/* The v25 orbit uses ordinary layers in the hero: no animated composite mask.
+   The opaque input covers the center, keeping the same full light on mobile. */
+.hero-search .search-light{z-index:1;padding:0;-webkit-mask:none;mask:none}
+.hero-search .search-input-row{background:#fff}
+
 @media(prefers-reduced-motion:reduce){:root .search-light:before{animation:none!important;will-change:auto}}
 
 .tool-control-group{border:0;padding:0;margin:0;min-width:0;width:100%}

@@ -78,10 +78,10 @@ function recoverTables(page:NativePage,text:NativeText[],graphics:NativeGraphic[
    const vertical=page.drawings.flatMap(d=>d.rules).filter(r=>Math.abs(r.x1-r.x2)<.6&&r.x1>=left-1&&r.x1<=right+1&&Math.max(r.y1,r.y2)>top+1&&Math.min(r.y1,r.y2)<group[start+2].y1);
    const grid=unique(vertical.map(r=>r.x1)).length>=3;
    if(grid){while(end+1<group.length&&group[end+1].y1-group[end].y1<65)end++;}
-   const bottom=group[end].y1,area={x:left,y:top,width:right-left,height:bottom-top};
+   let bottom=group[end].y1;const area={x:left,y:top,width:right-left,height:bottom-top};
    if(area.height<20||area.height>page.height*.82){start++;continue;}
-   const inside=text.filter(i=>contains(area,i.x+i.width*.5,i.baseline-i.size*.25));
-   const lines=nativeLines(inside);if(lines.length<2){start++;continue;}
+   let inside=text.filter(i=>contains(area,i.x+i.width*.5,i.baseline-i.size*.25));
+   let lines=nativeLines(inside);if(lines.length<2){start++;continue;}
    const headerLines=lines.filter(l=>l.baseline<group[start+1].y1+1);
    const header=headerLines[0];if(!header){start++;continue;}
    let boundaries:number[];
@@ -94,25 +94,43 @@ function recoverTables(page:NativePage,text:NativeText[],graphics:NativeGraphic[
     boundaries=[left,...cells.slice(1).map(c=>c[0].x-pad),right];
    }
    if(boundaries.some((b,i)=>i>0&&b-boundaries[i-1]<8)){start++;continue;}
+   if(!grid){
+    // A booktabs total can sit between an additional pair of rules. Keep that
+    // short, bold, multi-column band in this table instead of ordinary prose.
+    while(end+1<group.length&&group[end+1].y1-bottom<header.size*2.6){
+     const nextBottom=group[end+1].y1;
+     const band=text.filter(i=>i.text.trim()&&i.x+i.width*.5>=left&&i.x+i.width*.5<=right&&i.baseline-i.size*.25>bottom&&i.baseline-i.size*.25<nextBottom);
+     const occupied=new Set(band.map(i=>boundaries.slice(1).findIndex(x=>i.x+i.width*.5<x)));
+     if(occupied.size<2||!band.every(i=>i.bold))break;
+     bottom=nextBottom;area.height=bottom-top;end++;
+    }
+    inside=text.filter(i=>contains(area,i.x+i.width*.5,i.baseline-i.size*.25));lines=nativeLines(inside);
+   }
    let rowBounds:number[];
    if(grid)rowBounds=unique(group.slice(start,end+1).map(r=>r.y1));
    else{
     const headerBottom=group[start+1].y1;
     const body=lines.filter(l=>l.baseline>headerBottom+1);
-    // Row spacing is often larger than wrapped-line leading. Cap the estimate
-    // by the actual body font size so short identifier rows are not merged.
-    const leading=Math.min(median(body.slice(1).map((l,i)=>l.baseline-body[i].baseline).filter(g=>g>3&&g<30))||header.size*1.2,(median(body.map(l=>l.size))||header.size)*1.22);
+    // Estimate wrapped leading within each column. A global previous line can
+    // belong to another cell; its cadence must not merge unrelated table rows.
+    const columns=boundaries.slice(0,-1).map((x,column)=>nativeLines(inside.filter(i=>i.text.trim()&&i.x+i.width*.5>=x-.2&&i.x+i.width*.5<boundaries[column+1]-.2&&i.baseline>headerBottom+1)));
+    const size=median(body.map(l=>l.size))||header.size;
+    const gaps=columns.flatMap(column=>column.slice(1).map((l,i)=>l.baseline-column[i].baseline)).filter(g=>g>size*.75&&g<size*2.5).sort((a,b)=>a-b);
+    const leading=Math.min(gaps[Math.floor(gaps.length*.2)]||size*1.2,size*1.22);
     const starts:NativeLine[]=[];let previous:NativeLine|undefined;
-    for(const line of body){
-     const first=line.items.filter(i=>i.text.trim()&&i.x+i.width*.5<boundaries[1]);
-     const firstText=first.map(i=>i.text).join('').trim();
+    for(const line of columns[0]){
+     const firstText=line.items.map(i=>i.text).join('').trim();
      const numeric=/^\d+(?:\s*[-–]\s*\d+)?[.)]?$/.test(firstText);
-     const bold=first.length>0&&first.every(i=>i.bold);
-     if(first.length&&(!starts.length||numeric||bold||!previous||line.baseline-previous.baseline>leading*1.22))starts.push(line);
+     // Booktabs often adds only a fraction of a font size between rows.
+     // Wrapped labels, including bold labels, stay inside their original cell.
+     if(!previous||numeric||line.baseline-previous.baseline>leading+Math.max(1,line.size*.16))starts.push(line);
      previous=line;
     }
     if(!starts.length){start++;continue;}
-    rowBounds=[top,headerBottom,...starts.slice(1).map(l=>l.baseline-l.size*1.08),bottom];
+    rowBounds=unique([top,headerBottom,...starts.slice(1).map(l=>{
+     const y=l.baseline-l.size*1.08,rule=group.slice(start+1,end).find(r=>Math.abs(r.y1-y)<l.size*.4);
+     return rule?.y1??y;
+    }),bottom]);
    }
    const rows=rowBounds.slice(0,-1).map((y,index)=>({top:y,height:rowBounds[index+1]-y,cells:boundaries.slice(0,-1).map((x,column)=>({lines:nativeLines(inside.filter(i=>i.x+i.width*.5>=x-.2&&i.x+i.width*.5<boundaries[column+1]-.2&&i.baseline-i.size*.25>=y-.2&&i.baseline-i.size*.25<rowBounds[index+1]-.2))}))}));
    if(rows.length<2||rows.some(row=>row.height<3)){start++;continue;}

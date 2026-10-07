@@ -12,6 +12,23 @@ export function ToolSearch({compact=false,animatedBorder=true,onNavigate}:{compa
  const root=useRef<HTMLDivElement>(null),list=useRef<HTMLDivElement>(null),input=useRef<HTMLInputElement>(null);const id=compact?'dialog-tool-search':'hero-tool-search';
  const results=useMemo(()=>searchTools(query),[query]);
  const visible=open&&(compact||query.trim().length>0);
+ useEffect(()=>{
+  if(!animatedBorder||compact||!root.current?.closest('.hero-search'))return;
+  const motion=window.matchMedia('(prefers-reduced-motion: reduce)');let frame=0;
+  const resume=()=>{
+   if(document.hidden){cancelAnimationFrame(frame);frame=0;return;}
+   if(motion.matches||frame)return;
+   frame=requestAnimationFrame(()=>{
+    frame=0;if(document.hidden||motion.matches)return;
+    // Resume a browser-paused CSS orbit without restarting its phase on focus.
+    for(const animation of root.current?.querySelector('.search-light')?.getAnimations?.({subtree:true})||[]){
+     if((animation as CSSAnimation).animationName==='search-orbit'&&animation.playState!=='running')animation.play();
+    }
+   });
+  };
+  resume();document.addEventListener('visibilitychange',resume);window.addEventListener('pageshow',resume);window.addEventListener('focus',resume);window.addEventListener('resize',resume);window.visualViewport?.addEventListener('resize',resume);motion.addEventListener('change',resume);
+  return()=>{cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',resume);window.removeEventListener('pageshow',resume);window.removeEventListener('focus',resume);window.removeEventListener('resize',resume);window.visualViewport?.removeEventListener('resize',resume);motion.removeEventListener('change',resume)};
+ },[animatedBorder,compact]);
  useLayoutEffect(()=>{
   if(!visible||compact)return;let frame=0;
   const measure=()=>{const rect=root.current?.querySelector('.search-input-row')?.getBoundingClientRect();if(!rect)return;const vv=window.visualViewport;const next=searchPlacement(rect,{top:vv?.offsetTop||0,left:vv?.offsetLeft||0,height:vv?.height||window.innerHeight,width:vv?.width||window.innerWidth});setPlacement(previous=>previous&&Object.keys(next).every(key=>previous[key as keyof Placement]===next[key as keyof Placement])?previous:next)};

@@ -41,12 +41,13 @@ export function packageEditablePDF(pages:EditablePage[],signal:AbortSignal){
  }
  function tableXML(table:NativeTable,margin=0){
   const widths=table.columns.slice(1).map((x,i)=>x-table.columns[i]);
+  const ruled=(y:number)=>table.rules.some(rule=>Math.abs(rule.y1-y)<.7);
   const none='<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/>';
   return`<w:tbl><w:tblPr><w:tblW w:w="${twips(table.width)}" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblInd w:w="${twips(table.x-margin)}" w:type="dxa"/><w:tblBorders>${none}</w:tblBorders><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${widths.map(x=>`<w:gridCol w:w="${twips(x)}"/>`).join('')}</w:tblGrid>${table.rows.map((row,index)=>`<w:tr><w:trPr><w:cantSplit/>${index===0&&table.header?'<w:tblHeader/>':''}<w:trHeight w:val="${twips(row.height)}" w:hRule="exact"/></w:trPr>${row.cells.map((cell,column)=>{
    const first=cell.lines[0],leading=cell.lines.length>1?cell.lines[1].baseline-first.baseline:(first?.size||10)*1.15;
    const before=first?Math.max(0,first.baseline-row.top-wordBaseline(first.size,leading)):0;
    const border=(edge:string,visible:boolean)=>`<w:${edge} w:val="${visible?'single':'nil'}"${visible?' w:sz="4" w:color="'+(table.grid?'D1D5DB':'000000')+'"':''}/>`;
-   return`<w:tc><w:tcPr><w:tcW w:w="${twips(widths[column])}" w:type="dxa"/><w:tcBorders>${border('top',table.grid||index===0)}${border('bottom',table.grid||index===0||index===table.rows.length-1)}${border('left',table.grid)}${border('right',table.grid)}</w:tcBorders><w:vAlign w:val="top"/><w:tcMar><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar></w:tcPr>${paragraph(cell.lines,table.columns[column],leading,before)}</w:tc>`;
+   return`<w:tc><w:tcPr><w:tcW w:w="${twips(widths[column])}" w:type="dxa"/><w:tcBorders>${border('top',table.grid||index===0||(index>1&&ruled(row.top)))}${border('bottom',table.grid||index===0||index===table.rows.length-1||ruled(row.top+row.height))}${border('left',table.grid)}${border('right',table.grid)}</w:tcBorders><w:vAlign w:val="top"/><w:tcMar><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar></w:tcPr>${paragraph(cell.lines,table.columns[column],leading,before)}</w:tc>`;
   }).join('')}</w:tr>`).join('')}</w:tbl><w:p><w:pPr><w:spacing w:line="1" w:lineRule="exact" w:after="0"/></w:pPr></w:p>`;
  }
  const body=pages.map((page,index)=>{
