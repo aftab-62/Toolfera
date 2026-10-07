@@ -445,6 +445,11 @@ body{background:radial-gradient(ellipse 1000px 650px at 100% 400px,#e8f6fa90,tra
 /* OS motion preferences leave progress values/statuses and action timing intact. */
 .search-light-edge{display:none}
 @media(prefers-reduced-motion:reduce){.search-light:before{display:none}.search-light{background:linear-gradient(110deg,#2f5bff,#148cff,#25d8ff)}.hero-phrase{transform:none!important}.hero-art:hover>img{transform:none!important}}
+
+/* Homepage examples share the outer card surface, with one quiet separator. */
+.popular-section .tool-mini-preview{border:0;border-top:1px solid #d7e2f080;border-radius:0;background:transparent;box-shadow:none;padding:12px 0 0;min-height:0;margin:16px 0 0;overflow:visible}
+.popular-section .tool-mini-preview>svg{right:0;top:12px}
+.popular-section .mini-formats,.popular-section .mini-text-count{flex-wrap:wrap}
 /* Existing small controls get touch space without enlarging desktop layouts. */
 @media(pointer:coarse){.tool-card>.favorite-button,.saved-row .favorite-button,.remove-row,.pdf-file-list button,.saved-clear,.download-fallback{min-width:44px;min-height:44px}.grade-row,.grade-table-head{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr) 44px}.pdf-file-list li>div{gap:2px}[data-slot=slider]{min-height:44px}.saved-switch button{min-height:44px}.tool-page .field-input{min-height:44px}}
 .tool-explainer .workflow-link{margin-top:12px}.workflow-link a{color:#234bc7;text-decoration:underline;text-underline-offset:3px}
