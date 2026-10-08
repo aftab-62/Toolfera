@@ -1,8 +1,7 @@
-import workerURL from './word-pdf.worker?worker&url';
 import type {WordPDFModel} from './word-pdf-model';
 import {readFileBytes,type ReadReporter} from './file-input';
 function run<T>(input:object,signal:AbortSignal,progress:(message:string)=>void,transfer:Transferable[]=[]){return new Promise<T>((resolve,reject)=>{
- let worker:Worker;try{worker=new Worker(workerURL,{type:'module'})}catch{reject(new Error('Unable to start Word conversion. Use a recent browser and reload this tool.'));return}let settled=false;
+ let worker:Worker;try{worker=new Worker(new URL('./word-pdf.worker.ts',import.meta.url),{type:'module'})}catch{reject(new Error('Unable to start Word conversion. Use a recent browser and reload this tool.'));return}let settled=false;
  const clean=()=>{worker.terminate();signal.removeEventListener('abort',abort)};
  const abort=()=>{if(settled)return;settled=true;clean();reject(new DOMException('Cancelled','AbortError'))};
  const fail=()=>{if(settled)return;settled=true;clean();reject(new Error('The Word conversion worker stopped. Try a smaller document.'))};

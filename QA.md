@@ -39,3 +39,15 @@ Physical-phone rendering/performance, mobile touch/keyboard lifecycle, Lighthous
 When toolfera.xyz is actually active, coordinate SITE_URL, canonicals, social/schema URLs, sitemap and host redirects, then verify the destination. Set up Google Search Console and Bing Webmaster Tools, submit the canonical sitemap and monitor indexing. Rankings, traffic, search volumes and keyword difficulty remain unmeasured.
 
 Evidence: docs/seo/final-audit.json, docs/seo/live-browser.json, docs/SEO_REPORT.md, docs/SEO_INVENTORY.csv, docs/SEO_KEYWORD_MAP.csv, docs/SEO_RESEARCH.md and docs/SEO_LAUNCH_CHECKLIST.md.
+
+## Targeted Vercel compatibility verification — 8 October 2026
+
+This appendix records new deployment checks against GitHub baseline `af4cf80cfafad60394cc018d0ee45a15c5c12df5` / published Sites version 33. Earlier SEO checks above were not rerun as a new SEO project. No Sites publication or custom-domain migration was performed.
+
+**Verified:** frozen-lockfile pnpm 11.25.0 offline installation; standalone TypeScript; one native Next.js 16.3.4 Webpack production build; 79 generated entries with all 74 intended indexable paths represented; native production HTTP 200 for all 74 sitemap URLs; representative tool controls in rendered HTML; 4 noindex/404 cases; 3 trailing-slash redirects; all 222 public assets, all 79 emitted JavaScript files and both generated CSS files served with matching bytes; WASM/JavaScript/CSS MIME types; native server startup without SITES_* variables; unchanged canonical/sitemap origin. All 14 new guide sources remain present.
+
+**Worker/deployment safety:** six client modules now use shared Vite/Webpack worker URL creation. Targeted Vite compilation emitted all five worker types. Seven native entries initialized in a Node VM and their generated chunk paths resolved; JSON formatting, PDF inspection and DOCX ZIP-read smoke messages passed. The image worker returned expected compatibility guidance in the VM without browser canvas. No Cloudflare/Sites runtime file was found in native Next.js server traces. No new application processing algorithm, SEO content, route or animation change was made; the lockfile and public assets are unchanged.
+
+**Limitations:** HTTP/rendered-HTML and VM checks are not physical-phone or browser Worker tests. No actual Vercel deployment, cold network install, Vercel CDN behavior, browser console/hydration, OCR/canvas execution, saved-file completion, converter-fidelity rerun, Lighthouse or field Core Web Vitals result is claimed. A full new Cloudflare build was not repeated; its configuration and original commands are preserved, and the changed worker paths were verified with Vite.
+
+Exact import settings, changed files, representative routes and evidence scope: `docs/VERCEL_DEPLOYMENT.md`. Vercel requires `ENABLE_EXPERIMENTAL_COREPACK=1` for the existing pnpm pin; native build command is `pnpm run build:vercel`. Keep the current Sites SEO origin until the separately authorized domain migration.

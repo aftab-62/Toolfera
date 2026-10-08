@@ -20,7 +20,38 @@ pnpm build
 pnpm start
 ```
 
-The current production target is a Cloudflare Worker, not a plain static export. The existing Sites hosting identity is in `.openai/hosting.json`. Deploy using the existing Sites release workflow; do not create a replacement project. Future custom-domain configuration is centralized in `lib/seo.tsx`; `toolfera.xyz` has not been migrated.
+The existing Sites production target is a Cloudflare Worker, not a plain static export. The existing Sites hosting identity is in `.openai/hosting.json`. The original `dev`, `build` and `start` scripts retain that workflow. Future custom-domain configuration is centralized in `lib/seo.tsx`; `toolfera.xyz` has not been migrated.
+
+## Native Next.js / Vercel
+
+The same application also has a native Next.js build path. `vercel.json` selects it without changing the Sites/Cloudflare configuration. Browser workers use the shared `new Worker(new URL(..., import.meta.url))` form supported by both Vite and Webpack. Worker algorithms and same-origin engine assets are unchanged.
+
+Use Node.js **24.x** on Vercel (the repository requires at least 22.13.0). Enable Corepack with the Vercel environment variable **`ENABLE_EXPERIMENTAL_COREPACK=1`** so installation honors the existing **pnpm 11.25.0** pin and lockfile.
+
+| Vercel New Project setting | Value |
+| --- | --- |
+| Framework Preset | Next.js |
+| Root Directory | `./` (repository root) |
+| Build Command | `pnpm run build:vercel` |
+| Output Directory | Leave override OFF; Next.js manages `.next` |
+| Install Command | `pnpm install --frozen-lockfile` |
+| Environment Variables | `ENABLE_EXPERIMENTAL_COREPACK=1` |
+
+No application credentials, database bindings or paid processing services are required. Do **not** set `SITE_URL` to a preview hostname or `toolfera.xyz` yet: the current canonical/sitemap/schema origin remains the existing published Sites origin. Domain migration is a separate step after a temporary Vercel deployment is tested.
+
+To run the Vercel-compatible path locally after the same dependency installation:
+
+```sh
+pnpm dev:vercel
+# http://localhost:3000
+
+pnpm exec tsc --noEmit --incremental false
+pnpm build:vercel
+pnpm start:vercel
+# http://localhost:3000
+```
+
+Keep the entire `public/` directory, including PDF.js workers/CMaps/fonts/WASM, OCR workers/core/language data and DOCX fonts. Vercel serves these at their existing absolute paths; Next.js emits application workers under `/_next/static/`. Do not use the Cloudflare `dist/` directory as the Vercel output, and do not add an SPA fallback rewrite.
 
 ## Source structure
 
