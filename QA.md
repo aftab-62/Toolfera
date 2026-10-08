@@ -1,3 +1,55 @@
+# Tool Fera — shared homepage search-border correction
+
+**Current targeted checks: 8 October 2026 (UTC).** Continued the published version-30 source at `367ca276a30d6cc3344608ba79c54c159bface13`. This pass changes only the homepage search decorative border. The older reports below are historical evidence; their mask-free/edge-strip search treatment is superseded here.
+
+**Release status: version 31 is published** at https://utilityhub.maftab7806.chatgpt.site/. Deployment `appgdep_6ac72dd6dce48191b9af5d8f0ca668f9` succeeded on **8 October 2026 at 05:45:24 UTC**, from checked runtime source `0ca906da2b4ebcd92fd3452d68077fe431080856`. TypeScript and one production build passed. No previous broad QA, converter testing, SEO audit or optimization pass was repeated. GitHub release: `aftab-62/Toolfera`, `main`, message `Match mobile homepage search animation to desktop`. The exact commit SHA and guarded push result are provided in the completion report rather than embedded in the self-referential commit. Final documentation-only updates require no second build or publication.
+
+## Diagnosis and exact scope
+
+- Inspected both supplied recordings across their durations: the 4.70-second desktop recording and 7.95-second mobile recording, using sampled frames and cropped border comparisons. Desktop has a rotating cobalt/cyan conic perimeter. Mobile shows individual flat edge strips fading in sequence, including an extended bright top strip; it is not visually the same effect.
+- Current saved code had a concrete second renderer: four `search-light-edge` spans with staggered eight-second `search-soft-light` opacity animations under `prefers-reduced-motion: reduce`. These rectangular strips have no rounded corner path. The mobile recording is consistent with that renderer. **The recording cannot establish the phone's actual matchMedia/OS preference**, so activation of reduced motion on that physical phone is not claimed as proven.
+- No width-only alternate gradient, orbit timing or normal-motion static mobile override was found. Normal desktop and mobile already referenced the same six-second conic orbit; the offending alternate visual path was the motion-preference fallback, not a confirmed max-width override.
+- The previous hero rule also removed the border mask (`mask:none`, padding 0, z-index 1), relying on the opaque input to conceal the interior. The correction uses an explicit content-box/border-box subtractive mask instead of that paint-order dependency.
+- Runtime files changed: **`app/globals.css`** and **`components/site/search.tsx`** only. The latter removes the four decorative edge spans; its search handlers, result portal, focus, keyboard and recovery effects are otherwise byte-identical.
+
+## Shared rendering correction
+
+- One decorative `.search-light` and its existing `::before` conic gradient now render every normal-motion viewport. The original cobalt/cyan gradient stops, **six-second `search-orbit`**, rotation keyframes, square coverage and centered transform are unchanged.
+- One shared **3px ring**, **15px input radius**, **18px exterior radius**, negative exterior inset and content-box padding apply at all widths. Standard `mask-composite:exclude` and WebKit `-webkit-mask-composite:xor` remove the center; rounded overflow clips the outer boundary. The light stays on the perimeter instead of inside the input.
+- There is no mobile-specific animation, top-only renderer, hover activation, added library, engine preload or JavaScript animation loop. The layer has `pointer-events:none`; the dialog's static search treatment is unchanged.
+- Genuine reduced motion uses **the same rounded layer and conic gradient without continuous rotation**. It no longer switches to four straight edge strips. Accessibility preferences are not overridden, and useful hero phrase rotation/fade rules are unchanged.
+
+## Actual checks passed
+
+- Source and compiled production CSS cascade/geometry assertions at **320, 360, 390, 430, 768 and 1440px**, in normal and reduced motion: shared mask, WebKit/standard compositing, radius, padding/inset, full normal orbit, no edge spans/keyframes and static shared reduced-motion ring. These are responsive rule/geometry assertions, **not rendered mobile-browser screenshots**.
+- Controlled current search-effect execution: paused-orbit recovery; focus/resize bursts without phase resets; hidden/visible, pageshow and visual-viewport/keyboard-like resize recovery; live motion-preference changes; non-hero/modal exclusion; event/frame cleanup. This is a hook/event harness, not a real OS keyboard or physical phone.
+- **TypeScript:** `tsc --noEmit --incremental false`, exit 0.
+- **One production build:** exit 0. No second build, installation or dependency change. The existing Vinext route-classification information notice remains.
+- Built Worker homepage: HTTP 200 with one decorative ring and no edge spans. Both built CSS files returned 200 and matched disk output. Application Worker errors: 0; the emulator's unavailable `Request.cf` metadata warning is infrastructure, not a claimed browser result. Emulator disposed after the check.
+- Built raw CSS: **159,258 → 159,370 bytes (+112 bytes)** compared with the measured version-30 output. Main CSS is `index.Dg17Vyua.css` (140,150 bytes); unchanged action CSS is 19,220 bytes. No homepage-JS reduction, Lighthouse score, mobile timing or CWV result is inferred.
+- Exact file-scope assertions and diff checks preserve all other saved files, including PDF → Word/table reconstruction, Word → PDF, OCR, calculators, processing engines, hero component, header, routes, SEO, card cleanup, catalog loading and performance architecture.
+
+## Published desktop visual checks
+
+- Live Chrome reported **1363px** width, `prefers-reduced-motion: reduce = false`, and current `/_next/static/css/index.Dg17Vyua.css`. The ring has zero edge children, content-box/border-box clip and origin, `mask-composite:exclude`, 3px padding, -3px inset and 18px radius. Input: 643.23 × 62px; outer ring: 649.23 × 68px. Desktop horizontal overflow: false.
+- Visually inspected six successive actual-browser screenshots spanning **0.45–2.09 seconds** and a further screenshot **54.51 seconds** after capture started. Border highlights visibly changed along the rounded perimeter; this is rendered desktop evidence, not merely a keyframe-name or image-hash check.
+- Filling homepage search with `pdf` produced real results. Clearing it, opening the header search and closing it left the homepage `search-orbit` running with changed geometry. Hero phrases also changed in the observed session. No hero source change was made.
+- Captured recent warning/error batch after publication: **14 entries, all extension-origin; 0 application-origin entries**. This is limited to the captured desktop session, not a full-site error certification.
+- Actual browser frames were saved under `toolfera-v31-perimeter-1791438403522-*`. They are desktop evidence; there are no new mobile-browser screenshots.
+
+## Visual verification limits
+
+- Available live Chrome before the correction reported 1363px width, normal motion (`reduce=false`) and the old mask-free rule. Browser controls do not expose usable mobile viewport emulation, and managed preview is unavailable in this environment.
+- **Physical-phone/mobile-browser geometry, mobile overflow, touch keyboard behavior, Safari rendering and reduced-motion preference on the supplied phone remain unverified.** The CSS matrix and moving keyframe alone are not declared visual mobile acceptance.
+- Native publication succeeded and current live desktop CSS/geometry was verified. No unperformed mobile visual acceptance is claimed.
+- No converter changes or new Word/WPS/file-save verification. No Lighthouse, lab performance score, physical-phone performance, real-user Core Web Vitals or reproduced historical `Object.defineProperty` diagnosis.
+
+---
+
+## Historical version-30 and earlier reports
+
+These dated reports describe their own releases. Their search-border appearance claims do not establish acceptance of this current correction.
+
 # Tool Fera — mobile search, instant menu and empty calculator correction
 
 **Current targeted checks: 8 October 2026 (UTC).** Continued the saved/published version-29 source `e3f0a68731b870b554c81d18959fd74875d81fc8`; the previous PDF → Word table/text correction was not repeated or modified. This section is the current UX report. The retained older reports below are dated historical evidence, not current calculator-default or device acceptance claims.
