@@ -180,10 +180,12 @@ html:has(.hub-dialog[open]){overflow:hidden}
 
 .tool-search:focus-within .search-light{opacity:1}
 
-/* The v25 orbit uses ordinary layers in the hero: no animated composite mask.
-   The opaque input covers the center, keeping the same full light on mobile. */
-.hero-search .search-light{z-index:1;padding:0;-webkit-mask:none;mask:none}
-.hero-search .search-input-row{background:#fff}
+/* One perimeter geometry at every width. Paint the orbit outside the opaque
+   input, with the same quiet outer halo even on devices without hover. */
+.hero-search .tool-search{--search-radius:15px;--search-ring:3px}
+.hero-search .search-light{inset:calc(-1 * var(--search-ring));border-radius:calc(var(--search-radius) + var(--search-ring));z-index:1;padding:0;-webkit-mask:none;mask:none}
+.hero-search .search-input-row{background:#fff;border-radius:var(--search-radius)}
+.hero-search .tool-search:after{opacity:1;inset:calc(-1 * var(--search-ring));border-radius:calc(var(--search-radius) + var(--search-ring))}
 
 @media(prefers-reduced-motion:reduce){:root .search-light:before{animation:none!important;will-change:auto}}
 
@@ -471,5 +473,3 @@ body{background:radial-gradient(ellipse 1000px 650px at 100% 400px,#e8f6fa90,tra
 /* Existing small controls get touch space without enlarging desktop layouts. */
 @media(pointer:coarse){.tool-card>.favorite-button,.saved-row .favorite-button,.remove-row,.pdf-file-list button,.saved-clear,.download-fallback{min-width:44px;min-height:44px}.grade-row,.grade-table-head{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr) 44px}.pdf-file-list li>div{gap:2px}[data-slot=slider]{min-height:44px}.saved-switch button{min-height:44px}.tool-page .field-input{min-height:44px}}
 .tool-explainer .workflow-link{margin-top:12px}.workflow-link a{color:#234bc7;text-decoration:underline;text-underline-offset:3px}
-
-.overlay-loading{min-height:220px;display:flex;align-items:center;justify-content:center;color:var(--soft)}

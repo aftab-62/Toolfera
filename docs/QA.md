@@ -1,3 +1,80 @@
+# Tool Fera — mobile search, instant menu and empty calculator correction
+
+**Current targeted checks: 8 October 2026 (UTC).** Continued the saved/published version-29 source `e3f0a68731b870b554c81d18959fd74875d81fc8`; the previous PDF → Word table/text correction was not repeated or modified. This section is the current UX report. The retained older reports below are dated historical evidence, not current calculator-default or device acceptance claims.
+
+**Release status: version 30 is published** at https://utilityhub.maftab7806.chatgpt.site/. Deployment `appgdep_6ac72617966481918bdf14e5e5b49a17` succeeded on **8 October 2026 at 05:12:22 UTC**, from tested runtime source `540801645327d78c69fee9d9b3600feca898f71a`. The targeted implementation, TypeScript, one production build and representative live desktop checks passed. Repository/branch: `aftab-62/Toolfera`, `main`; one commit message: `Polish mobile search, instant tool menu and calculator defaults`. Its exact GitHub commit/push receipt is reported separately after the guarded branch update. Final documentation-only updates require no second build or publication.
+
+## Homepage search perimeter — corrected; mobile visual acceptance limited
+
+- Inspected the supplied real-phone video at 0/3/6 seconds and the menu screenshot. The light and hero phrase already move in that recording. This task corrects the visible perimeter treatment rather than claiming to fix a new stopped timer.
+- The old search rules independently specified the input/light/halo radii and offsets; its extra outer halo depended on hover/focus, so a normal touch-only idle state did not receive the same complete treatment as desktop hover. The actual phone rendering cannot be diagnosed fully from a recording alone.
+- `app/globals.css` now defines one hero-search geometry at all sizes: **15px opaque input radius**, **3px external animated ring**, **18px outer radius**, and a matching always-visible subtle outer halo. The animated light sits behind the opaque input, so it paints the exterior perimeter instead of shining through the input. No separate mobile effect or new animation was introduced.
+- The v25 six-second cobalt/cyan conic `search-orbit`, keyframes and current mask-free rendering remain. The genuine reduced-motion eight-second gentle edge fallback remains. Header and modal search are untouched; the modal still has its static treatment.
+- Compiled current production CSS passed at **320, 360, 375, 390, 412, 430, 768, 1024 and 1440px**: identical ring geometry, input layering, no compositing mask, no hover requirement for the halo, full normal orbit, and separate reduced-motion fallback. These are compiled-rule checks, not device screenshots or a claim of actual mobile overflow measurement.
+- Current search recovery-effect checks passed for focus/resize bursts, hidden/visible recovery, pageshow, visual-viewport/keyboard-like resize, live motion preference changes and cleanup. These controlled hook/event checks do not simulate an actual phone keyboard or OS lifecycle.
+- `components/site/search.tsx` and `components/site/hero-phrases.tsx` are byte-identical to version 29. The hero rotation/recovery fix and search interaction/ranking remain preserved.
+
+## Lightweight menu/search — immediate catalog
+
+- `components/site/header-overlays.tsx` previously lazy-imported the small mobile navigation and search components on first opening, with a Suspense fallback saying **Preparing tools…**. That fallback caused the screenshot's empty waiting area.
+- Both lightweight components now import with the existing shared header shell and use the single existing `lib/tool-definitions.ts` catalog, which desktop navigation already uses. The fallback and unused `.overlay-loading` CSS were removed. Dialog open/close, focus return, keyboard support and navigation links were not redesigned.
+- Controlled first-render checks found all **7 category groups and 57 navigation/resource links**, plus immediate compact-search combobox/results. A `word to pdf` query selected Word to PDF first. These counts describe the rendered menu and are not a new route/tool-count audit.
+- The compiled header has **no first-opening dynamic menu/search import** and no Preparing tools string. Its static import graph contains **no PDF, OCR, DOCX parser or image processing engine**. Heavy tool interfaces/engines retain their existing lazy loading. No duplicate catalog source or preload request was created.
+- Measured raw compiled header static graph: **416,464 → 422,962 bytes (+6,498)**, reflecting early availability of the lightweight catalog/search UI. Header chunk itself: **14,646 → 14,463 bytes**. These graphs include shared framework dependencies and are not complete homepage download measurements. CSS total: **159,027 → 159,258 bytes (+231)**. No new dependency, animation loop, paid API or server processing.
+
+## Calculators — clean initial/reset state, unchanged engines
+
+The sample inputs came from hardcoded React initial state, including GPA/CGPA/merit rows; Age also populated its comparison date in an effect. There was no calculator-input localStorage persistence to delete. Currency, distance/efficiency units, pay period, percentage mode and component names remain sensible option defaults. Placeholder examples do not enter state or produce results.
+
+Changed only calculator UI components:
+
+| Component | Tools corrected |
+|---|---|
+| `components/site/math-tools.tsx` | Percentage, Fuel Cost, GPA, CGPA |
+| `components/site/additional-calculators.tsx` | Marks, Attendance, University Merit, Loan / EMI, Savings, Profit, Salary |
+| `components/site/everyday-calculators.tsx` | Age, Discount |
+
+- All **13 current calculator variants** start with blank actual numeric/date values and a neutral prompt, not a sample result or initial validation error. Existing automatic calculation runs only after sufficient inputs exist. Empty unused GPA/CGPA rows are ignored; partially completed rows do not create a sample average.
+- Reset clears calculation values/results; new course/semester/merit rows also start empty. Reset controls were added where the previous UI had none, using the existing ResetButton. Age requires two user-chosen dates and resets both.
+- Copy result appears only after a real valid result in the UIs that already support copying. Empty, partial and invalid inputs are not reported as successful calculations.
+- Controlled current-component event checks passed for fresh state, first-input retention, genuine calculation and Reset on all 13 variants. Also checked zero input, Discount's existing range validation and new empty rows. The controls were exercised with actual existing calculation functions, not copied/reimplemented formulas.
+- Sample test inputs produced: Percentage 15% of 200 = 30; Fuel 100km at 10km/L and USD2/L = USD20; GPA/CGPA equal three-credit grades 4/2 = 3.00; Marks 80/100 = 80%; Attendance 30/40 = 75%; zero-interest 1,200/12 loan = USD100/month; zero-return Savings 1,000 + 100/month for one year = USD2,200; Profit 1,000−700 = USD300; Salary 25×40×52 = USD52,000/year; Merit three 50/100 components weighted 10/40/50 = 50%; Discount 100 at 20% = 80; Age 2000-01-01 to 2020-01-01 = 20 years. These are verification inputs only, not page defaults.
+- The final production Worker rendered homepage and all 13 calculator pages with HTTP **200**, empty numeric/date input attributes and no precomputed result element. This is current production SSR evidence, not a browser edit session.
+
+## Scope / checks
+
+- Runtime diff: only the stylesheet, header overlay loading and the three calculator UI components above. **120 other tracked runtime files** under tools/components/site/lib/app were byte-identical to the saved version-29 baseline.
+- **PDF → Word, table reconstruction, native text editing, graphics, Word → PDF, OCR, PDF Compressor, image algorithms and all calculation engines were untouched.** No converter-quality testing or regeneration was repeated.
+- Hero implementation, static navy header, tool cards, routes, metadata, SEO, legal/resource content, safe prefetch, engine separation and other version-26 performance work remain.
+- **TypeScript passed:** `tsc --noEmit --incremental false`, exit 0.
+- **One production build passed**, exit 0. No repeat build. Afterward only an extra trailing CSS blank line was trimmed; stylesheet semantics and the checked compiled rules are unchanged. Existing proxy-environment warning and Vinext route-classification informational notice remain.
+- Final whitespace diff check passed. Targeted Worker application errors: **0**; Miniflare warned about unavailable live `Request.cf` metadata and used its default placeholder, an emulator/infrastructure warning. No preview server/watcher remains; Worker emulation was disposed.
+- No full performance, route/404, SEO, converter or unrelated tool audit was repeated.
+
+## Remaining verification limits
+
+- **No physical-phone, mobile-browser viewport, iOS/Safari or native keyboard test.** Mobile perimeter and first-menu feel still require the user's actual phone check. Compiled rules/controlled state tests are explicitly not visual acceptance.
+- No new Microsoft Word/WPS editing or converter pagination/quality certification; those converters were unchanged.
+- No Lighthouse, performance score, mobile timing, real-user Core Web Vitals or native saved-file completion measurement. Exact historical `Object.defineProperty` root cause remains unreproduced.
+- Live production desktop results, if obtained after publication, will be recorded separately below. No unperformed live check is claimed here.
+
+## Version-30 live desktop checks after publication
+
+Actual Chrome on the published Site reported **1363 × 936px**, `prefers-reduced-motion: reduce = false` and `document.hidden = false`, using `/_next/static/css/index.nhFKNUxu.css`.
+
+- The homepage light was visually observed in changing positions around the exterior perimeter in separate screenshots, with changing rotation matrices. The input bounds were 643.23 × 62px and the animated bounds 649.23 × 68px, confirming the 3px exterior ring on each edge; outer radius was 18px and the subtle halo opacity 1. Desktop horizontal overflow was false.
+- Hero phrases visibly changed during the checks, including resize images, Word to PDF and calculate instantly. Motion remained six-second continuous search-orbit after filling homepage search and after header search opening/closing. No claim of physical-phone recovery is made.
+- First and repeat header-search openings showed the combobox and populated results directly, without Preparing tools. A word-to-pdf query returned Word to PDF ahead of PDF to Word. This is observed desktop search, not a live mobile-drawer test.
+- Fresh live Percentage, Loan / EMI, Discount and GPA pages showed blank numeric controls and neutral results. Entered values produced respectively **30**, **USD100/month**, **80.00**, and **3.00**. Each Reset returned all numeric controls to empty and removed the numeric result. Adding an empty GPA course preserved the entered average; Reset restored three empty rows. These cover all three changed calculator UI modules; other variants have the controlled-component and production-SSR evidence above.
+- The captured warning/error batch contained **70 entries**, all with `chrome-extension://` source URLs. There were **zero captured application-origin warning/error entries**. This applies only to this targeted session.
+- A screenshot of the published homepage was saved as `toolfera-v30-ux-1791436605537.jpg`. It is visual desktop evidence, not a mobile screenshot or performance measurement.
+
+---
+
+## Historical version-29 and earlier evidence
+
+The reports below apply to their named releases and fixtures. Their calculator sample/default statements are superseded by this correction. They do not establish current phone acceptance.
+
 # Tool Fera — PDF table and homepage search correction
 
 Current targeted verification: **8 October 2026, Asia/Karachi (7 October UTC)**. Continued saved version 28 at source `87147f738b2abe0a62642c5d404e7091058814d4`. This report adds only results actually obtained for this correction. Earlier release evidence below is historical and is not a current full-platform certification.
