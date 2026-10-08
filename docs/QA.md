@@ -1,3 +1,47 @@
+# Tool Fera — homepage search-border motion correction
+
+**Current targeted checks: 8 October 2026 (UTC).** Continued published version 31 / saved source `6daaa6b00b63231a7ce16f65fd354b5ef70c70ff`. This is a motion-only correction. The accepted border appearance and all unrelated functionality are unchanged. Older reports below are historical; their static reduced-motion search rule is superseded here.
+
+**Release status: version 32 is published** at https://utilityhub.maftab7806.chatgpt.site/. Deployment `appgdep_6ac73601a6488191bf85ea551bf9436b` succeeded on **8 October 2026 at 06:20:20 UTC**, from checked runtime source `56f4ab8b54970cb628df40c79d6e0f79dc99f8ba`. TypeScript and one production build passed. GitHub target: `aftab-62/Toolfera`, `main`; message `Fix frozen mobile search border animation`. The exact final commit/push receipt is provided in the completion report rather than embedded in its own commit. Final documentation-only receipt updates do not require a second build/publication.
+
+## Confirmed freeze path / limits of diagnosis
+
+- Inspected the new 7.08-second phone recording using one-second samples. The cyan/cobalt ring stays in the same place across the observed frames while the hero changes; this is a real visible freeze, not a new geometry complaint.
+- Version 31 explicitly set `:root .hero-search .search-light:before` to **`animation:none!important`** when `prefers-reduced-motion:reduce` matched. That removes the orbit clock. Its recovery handler also returned early for the same preference, so it could not resume a calmer orbit.
+- The recording matches this static unrotated-gradient state. **The phone's actual matchMedia/OS setting cannot be queried from a recording**, so that setting is not claimed as directly measured. No width-only animation-disable rule, persisted Full Effects override or JavaScript interval driving the border was found in the current source.
+- The known CSS/recovery freeze path is removed. This does not constitute a claim that every possible physical-phone compositor/lifecycle issue was reproduced.
+
+## Exact correction and preserved appearance
+
+- `app/globals.css`: genuine reduced motion now runs the **same** `search-orbit` at **18 seconds** instead of disabling it. Normal desktop/mobile remains **6 seconds**. Other reduced-motion rules are unchanged.
+- `components/site/search.tsx`: remove the two motion-preference early exits from orbit recovery. CSS remains responsible for full/slower timing. Recovery batches one RAF only after lifecycle events and calls `play()` only on a stopped orbit, without resetting a running phase.
+- Existing visibility/pageshow/focus/resize/visual-viewport and motion-preference listeners remain; cleanup and the hidden-page guard remain. No border interval, per-frame React update, new listener, dependency or animation library was added.
+- Gradient colors/stops, square coverage, transforms/keyframes, mask, border thickness, radii, inset, layering, halo and DOM markup are byte-for-byte unchanged. **Hero phrase source and its CSS rules are unchanged.** Normal mobile is not treated as reduced motion.
+
+## Actual checks passed
+
+- Source and compiled CSS at **320, 360, 390, 430, 768 and 1440px**, in both preferences: original geometry, 6s normal / 18s reduced orbit, infinite linear timing and no width-only static rule. These are cascade/timing assertions, **not rendered mobile-browser frames**.
+- Current recovery-effect execution with controlled events in both preferences: initial resume, focus/resize burst coalescing, hidden/visible, pageshow, visual-viewport/keyboard-like resize, preference changes, unchanged phase and complete event/frame cleanup. Browsers without `getAnimations` do not throw; non-hero/modal searches remain excluded. This is not physical-phone lifecycle verification.
+- **TypeScript passed**, `tsc --noEmit --incremental false`, exit 0.
+- **One production build passed**, exit 0; no second build, dependency install or broad audit. The existing Vinext classification informational notice remains.
+- Built homepage and current CSS asset requests passed with HTTP 200. Application Worker errors: 0. The emulator's unavailable `Request.cf` metadata warning is infrastructure; the emulator was disposed.
+- Exact scope checks found only the two runtime files above changed; **656 other tracked files** were identical before QA updates. PDF → Word, table reconstruction, Word → PDF, OCR, PDF Compressor, calculators, menu, cards, header, routing, metadata, SEO and processing engines were not touched or retested.
+
+## Visual acceptance / remaining verification
+
+- Physical-phone/media-preference query, actual mobile viewport frames, native keyboard, OS background/foreground, Safari and touch-scroll lifecycle remain **UNVERIFIED**. Browser controls do not provide usable responsive sizing; managed preview is unavailable. CSS/event assertions alone are not declared successful mobile visual acceptance.
+- **Live published desktop rendered motion observed** in Chrome, viewport reported **1363px**, `prefers-reduced-motion:false`, current CSS `index.BTLfZFSQ.css`. Inspected real screenshot crops at **0.000, 0.925, 1.866 and 3.090 seconds**. Cyan/cobalt placement changes across top, sides and bottom; this is visible rendered movement, not only an animation-name/hash assertion. The accepted rounded ring geometry remains.
+- Exercised hero search focus/input (`json` gives JSON Formatter), cleared/escaped, opened and closed Find a tool, scrolled to `scrollY:936` and back to `0`. A subsequent inspected screenshot still shows a changed border phase and the CSS orbit remains 6s/running. Hero phrases visibly change in the captures; their logic was not edited. This is desktop interaction evidence, not a native mobile-keyboard test.
+- Captured live console entries after deployment: no Tool Fera application-origin warning/error in the captured checks. Errors that are present are from `chrome-extension://.../content-script.bundle.js`, not the site. No claim is made about untested tools or browsers.
+- The browser reports normal motion. The 18s reduced-motion path passed compiled CSS and recovery-effect checks, but could not be visually emulated in this browser. The phone recording does not expose its motion-preference flag.
+- No performance scores, Lighthouse or field Core Web Vitals are claimed. No converter or unrelated tool QA was repeated.
+
+---
+
+## Historical version-31 and earlier reports
+
+The dated evidence below applies to its own releases; it does not establish current mobile motion acceptance.
+
 # Tool Fera — shared homepage search-border correction
 
 **Current targeted checks: 8 October 2026 (UTC).** Continued the published version-30 source at `367ca276a30d6cc3344608ba79c54c159bface13`. This pass changes only the homepage search decorative border. The older reports below are historical evidence; their mask-free/edge-strip search treatment is superseded here.

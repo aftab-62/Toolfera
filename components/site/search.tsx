@@ -17,10 +17,10 @@ export function ToolSearch({compact=false,animatedBorder=true,onNavigate}:{compa
   const motion=window.matchMedia('(prefers-reduced-motion: reduce)');let frame=0;
   const resume=()=>{
    if(document.hidden){cancelAnimationFrame(frame);frame=0;return;}
-   if(motion.matches||frame)return;
+   if(frame)return;
    frame=requestAnimationFrame(()=>{
-    frame=0;if(document.hidden||motion.matches)return;
-    // Resume a browser-paused CSS orbit without restarting its phase on focus.
+    frame=0;if(document.hidden)return;
+    // CSS sets full/slower motion; resume either orbit without resetting its phase.
     for(const animation of root.current?.querySelector('.search-light')?.getAnimations?.({subtree:true})||[]){
      if((animation as CSSAnimation).animationName==='search-orbit'&&animation.playState!=='running')animation.play();
     }
