@@ -3,7 +3,7 @@ export const completedContent:Record<string,Partial<Tool>>={
   "marks-calculator": {
     "intro": "Check your marks percentage and the score needed from remaining assessments to reach a target. Enter obtained marks, completed totals and the marks still available.",
     "steps": [
-      "Replace the example obtained and completed marks with your results.",
+      "Enter your obtained marks and the completed assessment total.",
       "Enter the remaining marks and your target overall percentage.",
       "Read your current percentage and the marks still needed."
     ],

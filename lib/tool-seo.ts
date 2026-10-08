@@ -1,5 +1,6 @@
+import keywords from './tool-keywords.json' with {type:'json'};
 // Server-only page guidance. Keep this out of the lightweight search registry.
-export type ToolIntent = {primary:string;title:string;description:string;next?:{id:string;reason:string}[]};
+export type ToolIntent = {primary:string;title:string;description:string;secondary:string[];longTail:string[]};
 const rows:[string,string,string,string][]=[
  ['pdf-compressor','compress PDF','Compress PDF Online — Reduce File Size','Reduce PDF file size with simple compression levels. Compare original size and savings, and download only a meaningfully smaller result. Files stay on-device.'],
  ['pdf-merger','merge PDF','Merge PDF Files — Combine Documents in Order','Combine multiple PDFs into one document. Check page counts, choose file order and download a merged PDF with local browser processing.'],
@@ -48,23 +49,7 @@ const rows:[string,string,string,string][]=[
  ['random-number-generator','generate random numbers','Random Number Generator — Choose Range and Count','Generate random whole numbers within your chosen range using browser cryptographic randomness. Set the count and choose whether repeated values are allowed.'],
  ['invoice-generator','create PDF invoice','Invoice Generator — Download a Simple PDF Invoice','Create a PDF invoice from your business details and line items. Review totals and download locally; Tool Fera does not store invoice records.']
 ];
-export const toolIntents:Record<string,ToolIntent>=Object.fromEntries(rows.map(([id,primary,title,description])=>[id,{primary,title,description}]));
-const nextSteps:Record<string,{id:string;reason:string}[]>={
- 'pdf-compressor':[{id:'pdf-splitter',reason:'Need only a few pages? Extract them before compressing.'},{id:'pdf-merger',reason:'Combine related files before making the final document smaller.'}],
- 'pdf-to-word':[{id:'pdf-ocr',reason:'Scanned pages have no native text to convert. Use recognition for editable text.'},{id:'word-to-pdf',reason:'After editing your DOCX, create a PDF copy to share.'}],
- 'word-to-pdf':[{id:'pdf-compressor',reason:'Check whether the exported PDF can be made smaller.'},{id:'pdf-merger',reason:'Combine the finished document with another PDF.'}],
- 'jpg-to-pdf':[{id:'image-cropper',reason:'Trim unwanted borders before combining your images.'},{id:'pdf-merger',reason:'Combine the resulting PDF with another document.'}],
- 'pdf-to-jpg':[{id:'image-resizer',reason:'Change exported image dimensions for a specific pixel limit.'},{id:'image-compressor',reason:'Compare a smaller image copy before sharing it.'}],
- 'image-compressor':[{id:'image-resizer',reason:'Use dimensions when the requirement is a pixel limit, rather than a byte limit.'},{id:'jpg-to-pdf',reason:'Combine JPG or PNG images into a document.'}],
- 'image-resizer':[{id:'image-compressor',reason:'Reduce file size after setting the required dimensions.'},{id:'image-cropper',reason:'Select a specific region rather than resizing the entire image.'}],
- 'image-converter':[{id:'jpg-to-png',reason:'Use PNG for a lossless copy; it cannot restore detail lost in a JPG.'},{id:'png-to-jpg',reason:'Use JPEG for photographs when transparency is not needed.'}],
- 'image-to-text':[{id:'pdf-ocr',reason:'Recognize scanned PDF pages without exporting them as separate images first.'},{id:'text-cleaner',reason:'Tidy recognized whitespace after checking the OCR text.'}],
- 'pdf-ocr':[{id:'pdf-to-word',reason:'Already selectable text? Convert the native text without OCR.'},{id:'image-to-text',reason:'Recognize a single JPG or PNG scan instead.'}],
- 'gpa-calculator':[{id:'cgpa-calculator',reason:'Combine completed semesters using their total credits.'},{id:'marks-calculator',reason:'Check marks and target scores separately from grade points.'}],
- 'percentage-calculator':[{id:'marks-calculator',reason:'Find the score needed in remaining assessments.'},{id:'discount-calculator',reason:'See both savings and a final discounted price.'}],
- 'json-formatter':[{id:'base64-encoder-decoder',reason:'Decode a Base64 text payload before checking its JSON syntax.'},{id:'uuid-generator',reason:'Generate identifiers for your sample data.'}]
-};
-for(const [id,next] of Object.entries(nextSteps))toolIntents[id].next=next;
+export const toolIntents:Record<string,ToolIntent>=Object.fromEntries(rows.map(([id,primary,title,description])=>[id,{primary,title,description,...(keywords as Record<string,{primary?:string;secondary:string[];longTail:string[]}>)[id]}]));
 export const categorySEO:Record<string,{title:string;description:string}>={
  'pdf-tools':{title:'PDF Tools — Compress, Merge, Convert & OCR',description:'Edit PDF pages, reduce file size, convert PDF and DOCX, or recognize scanned text. Explore local browser tools with clear format and layout limitations.'},
  'image-tools':{title:'Image Tools — Compress, Resize, Crop & Convert',description:'Prepare images with local compression, resizing, cropping and format conversion. Extract English text with OCR and review previews before downloading.'},
